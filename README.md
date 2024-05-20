@@ -12,5 +12,6 @@ The Image Downloader application processes an Excel file containing image URLs a
 ## Requirements
 - Python 3.x
 - Required Python packages are listed in `requirements.txt`.
+- A Google Drive service account.
 
 

@@ -2,6 +2,11 @@ import os
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+import logging
+
+# configure logging
+logging.basicConfig(filename='check_drive.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 # Define the scope
 SCOPES = ["https://www.googleapis.com/auth/drive"]
@@ -23,14 +28,14 @@ def list_files(service, folder_id='root', indent=0):
         items = results.get('files', [])
 
         if not items:
-            print(' ' * indent + 'No files found.')
+            logging.debug(' ' * indent + 'No files found.')
         else:
             for item in items:
-                print(' ' * indent + f'{item["name"]} ({item["mimeType"]})')
+                logging.info(' ' * indent + f'{item["name"]} ({item["mimeType"]})')
                 if item['mimeType'] == 'application/vnd.google-apps.folder':
                     list_files(service, item['id'], indent + 4)
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        logging.error(f"An error occurred: {error}")
 
 
 def find_and_delete_file(service, filename):
@@ -41,14 +46,14 @@ def find_and_delete_file(service, filename):
         items = results.get('files', [])
 
         if not items:
-            print(f"No file found with name: {filename}")
+            logging.debug(f"No file found with name: {filename}")
         else:
             for item in items:
                 file_id = item['id']
                 service.files().delete(fileId=file_id).execute()
-                print(f"Deleted file: {item['name']} (ID: {file_id})")
+                logging.info(f"Deleted file: {item['name']} (ID: {file_id})")
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        logging.error(f"An error occurred: {error}")
 
 
 def find_folder(service, folder_name):
@@ -58,11 +63,11 @@ def find_folder(service, folder_name):
                                        fields="files(id, name, webViewLink)").execute()
         items = results.get('files', [])
         if not items:
-            print(f"Folder '{folder_name}' not found.")
+            logging.debug(f"Folder '{folder_name}' not found.")
             return None, None
         return items[0]['id'], items[0]['webViewLink']
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        logging.error(f"An error occurred: {error}")
         return None, None
 
 
@@ -73,9 +78,9 @@ if __name__ == "__main__":
     folder_name = 'Uploaded Images'
     folder_id, folder_url = find_folder(service, folder_name)
     if folder_id and folder_url:
-        print(f"Folder '{folder_name}' URL: {folder_url}")
+        logging.info(f"Folder '{folder_name}' URL: {folder_url}")
     else:
-        print(f"Folder '{folder_name}' not found.")
+        logging.debug(f"Folder '{folder_name}' not found.")
 
     #for filename in filenames_to_delete:
     #    find_and_delete_file(service, filename)

@@ -3,6 +3,11 @@ from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
+import logging
+
+logging.basicConfig(filename='share_drive.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
 
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'drive/credentials.json'
@@ -19,7 +24,7 @@ def create_folder(service, folder_name):
         'mimeType': 'application/vnd.google-apps.folder'
     }
     folder = service.files().create(body=file_metadata, fields='id,webViewLink').execute()
-    print(f'Folder ID: {folder.get("id")}')
+    logging.info(f'Folder ID: {folder.get("id")}')
     return folder.get('id'), folder.get('webViewLink')
 
 def upload_images_to_folder(service, folder_id, images_path):
@@ -34,9 +39,9 @@ def upload_images_to_folder(service, folder_id, images_path):
                 }
                 media = MediaFileUpload(image_path, mimetype='image/jpeg')
                 file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-                print(f'Uploaded {image} with ID: {file.get("id")}')
+                logging.info(f'Uploaded {image} with ID: {file.get("id")}')
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        logging.error(f"An error occurred: {error}")
 
 def make_folder_public(service, folder_id):
     """Makes the folder accessible to anyone with the link."""
@@ -49,15 +54,15 @@ def make_folder_public(service, folder_id):
         body=permission,
         fields='id'
     ).execute()
-    print("Folder is now public")
+    logging.info("Folder is now public")
 
 
-BRAND = 'Message'
+BRAND = 'MeetMeInSantorini'
 if __name__ == "__main__":
     service = create_service()
     folder_id, folder_link = create_folder(service, f'{BRAND}Uploaded Images')
     upload_images_to_folder(service, folder_id, 'data/images')
     make_folder_public(service, folder_id)
-    print(f"Access the uploaded folder here: {folder_link}")
+    logging.info(f"Access the uploaded folder here: {folder_link}")
 
 

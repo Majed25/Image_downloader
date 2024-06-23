@@ -1,4 +1,7 @@
 import pandas as pd
+import logging
+
+logging.basicConfig(filename='excel_handler.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def get_image_urls(file_path):
     # Load the Excel file
@@ -12,7 +15,7 @@ def get_image_urls(file_path):
     filtered_columns = df.filter(regex='^Style Image URL_\d+$')
     selected_columns = df[['Joor Style ID', 'Style Number', 'Style Name', 'Identifier']]
     df = pd.concat([selected_columns, filtered_columns], axis=1)
-    print(df.columns)
+    logging.debug(f'columns list: {df.columns}')
     #rename url_columns
     url_columns = df.filter(regex='^Style Image URL').columns
 

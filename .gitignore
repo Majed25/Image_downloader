@@ -1,0 +1,6 @@
+data/
+.idea/
+__pycache__/
+drive/.DS_Store
+drive/credentials.json
+token.json
